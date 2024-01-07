@@ -6,6 +6,9 @@ type FakeMessageGateway struct {
 	GeneratedUrl string
 }
 
-func (fmg FakeMessageGateway) SendTextPlainMessage(request gateways.SendTextPlainMessageRequest) (*gateways.SendMessageResponse, error) {
-	return &gateways.SendMessageResponse{Url: fmg.GeneratedUrl}, nil
+func (fmg FakeMessageGateway) SendTextPlainMessage(request gateways.SendTextPlainMessageRequest, response chan<- *gateways.SendMessageResponse) error {
+	go func() {
+		response <- &gateways.SendMessageResponse{Url: fmg.GeneratedUrl}
+	}()
+	return nil
 }

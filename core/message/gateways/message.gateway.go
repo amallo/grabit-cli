@@ -9,5 +9,5 @@ type SendMessageResponse struct {
 	Url string
 }
 type MessageGateway interface {
-	SendTextPlainMessage(request SendTextPlainMessageRequest) (*SendMessageResponse, error)
+	SendTextPlainMessage(request SendTextPlainMessageRequest, smr chan<- *SendMessageResponse) error
 }
