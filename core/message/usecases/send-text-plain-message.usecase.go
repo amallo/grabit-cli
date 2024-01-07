@@ -5,7 +5,8 @@ import (
 )
 
 type sendTextPlainMessageUseCase struct {
-	messageGateway gateways.MessageGateway
+	messageGateway   gateways.MessageGateway
+	messageEncrypter gateways.MessageEncrypter
 }
 type SendTextPlainMessageParams struct {
 	To      string
@@ -15,15 +16,20 @@ type SendTextPlainMessageResponse struct {
 	Url string
 }
 
-func NewSendTextPlainMessageUseCase(messageGateway gateways.MessageGateway) sendTextPlainMessageUseCase {
-	return sendTextPlainMessageUseCase{messageGateway: messageGateway}
+func NewSendTextPlainMessageUseCase(messageGateway gateways.MessageGateway, messageEncrypter gateways.MessageEncrypter) sendTextPlainMessageUseCase {
+	return sendTextPlainMessageUseCase{messageGateway: messageGateway, messageEncrypter: messageEncrypter}
 }
 
 func (uc *sendTextPlainMessageUseCase) Execute(params SendTextPlainMessageParams) (*SendTextPlainMessageResponse, error) {
 	responseChan := make(chan *gateways.SendMessageResponse, 1)
 	defer close(responseChan)
 
-	error := uc.messageGateway.SendTextPlainMessage(gateways.SendTextPlainMessageRequest{To: params.To, Content: params.Content}, responseChan)
+	message, error := uc.messageEncrypter.EncryptPlainText(params.To, params.Content)
+	if error != nil {
+		return nil, error
+	}
+	request := gateways.SendMessageRequest{Message: *message}
+	error = uc.messageGateway.Send(request, responseChan)
 	if error != nil {
 		return nil, error
 	}

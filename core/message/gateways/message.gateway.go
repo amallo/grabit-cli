@@ -1,13 +1,17 @@
 package gateways
 
-type SendTextPlainMessageRequest struct {
-	To      string
-	Content string
+import "grabit-cli/core/message/models"
+
+type SendMessageRequest struct {
+	Message models.Message
 }
 
 type SendMessageResponse struct {
 	Url string
 }
 type MessageGateway interface {
-	SendTextPlainMessage(request SendTextPlainMessageRequest, smr chan<- *SendMessageResponse) error
+	Send(request SendMessageRequest, smr chan<- *SendMessageResponse) error
+}
+type MessageEncrypter interface {
+	EncryptPlainText(to string, text string) (*models.Message, error)
 }
