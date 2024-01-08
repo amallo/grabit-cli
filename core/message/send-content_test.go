@@ -14,6 +14,7 @@ func Test(t *testing.T) {
 	var messageGateway *adapters.FakeMessageGateway
 	var messageEncrypter *adapters.FakeMessageEncrypter
 	var knownRecipientGateway *id_adapters.KnownRecipientGateway
+	var knowIdentityGateway *id_adapters.KnownIdentityGateway
 	g.Describe("audie sends content to michael", func() {
 		g.BeforeEach(func() {
 			messageEncrypter = &adapters.FakeMessageEncrypter{WillEncryptTextPlainAs: "ENCRYPTED"}
@@ -22,7 +23,7 @@ func Test(t *testing.T) {
 		})
 
 		g.It("Successfully send message content", func() {
-			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, messageEncrypter, knownRecipientGateway)
+			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, messageEncrypter, knownRecipientGateway, knowIdentityGateway)
 			params := core.SendTextPlainMessageParams{To: "michael@foo.com", Content: "binouze ce soir 19h"}
 			response, err := useCase.Execute(params)
 
@@ -33,7 +34,7 @@ func Test(t *testing.T) {
 
 		g.It("Fails to send text plain content to unknown recipient", func() {
 			unknownRecipientGateway := &id_adapters.UnknownRecipientGateway{}
-			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, messageEncrypter, unknownRecipientGateway)
+			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, messageEncrypter, unknownRecipientGateway, knowIdentityGateway)
 			params := core.SendTextPlainMessageParams{To: "michael@foo.com", Content: "binouze ce soir 19h"}
 			response, err := useCase.Execute(params)
 
@@ -43,7 +44,7 @@ func Test(t *testing.T) {
 
 		g.It("Fails to send text plain content when encryption failure", func() {
 			failureMessageEncrypter := adapters.FailureMessageStubEncrypter{}
-			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, failureMessageEncrypter, knownRecipientGateway)
+			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, failureMessageEncrypter, knownRecipientGateway, knowIdentityGateway)
 			params := core.SendTextPlainMessageParams{To: "michael@foo.com", Content: "binouze ce soir 19h"}
 			response, err := useCase.Execute(params)
 
@@ -53,12 +54,22 @@ func Test(t *testing.T) {
 
 		g.It("Fails to send text plain content when transmission fails", func() {
 			failureMessageGateway := &adapters.FailureMessageGateway{}
-			useCase := core.NewSendTextPlainMessageUseCase(failureMessageGateway, messageEncrypter, knownRecipientGateway)
+			useCase := core.NewSendTextPlainMessageUseCase(failureMessageGateway, messageEncrypter, knownRecipientGateway, knowIdentityGateway)
 			params := core.SendTextPlainMessageParams{To: "michael@foo.com", Content: "binouze ce soir 19h"}
 			response, err := useCase.Execute(params)
 
 			g.Assert(response).IsNil()
 			g.Assert(err.Error()).Equal("TRANSMISSION_FAILURE")
+		})
+
+		g.It("Fails to send text plain content using unregistered identity", func() {
+			unknownIdentityGateway := &id_adapters.UnknownIdentityGateway{}
+			useCase := core.NewSendTextPlainMessageUseCase(messageGateway, messageEncrypter, knownRecipientGateway, unknownIdentityGateway)
+			params := core.SendTextPlainMessageParams{To: "michael@foo.com", Content: "binouze ce soir 19h"}
+			response, err := useCase.Execute(params)
+
+			g.Assert(response).IsNil()
+			g.Assert(err.Error()).Equal("UNKNOWN_IDENTITY")
 		})
 
 	})
