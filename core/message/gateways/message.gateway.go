@@ -4,6 +4,7 @@ import "grabit-cli/core/message/models"
 
 type SendMessageRequest struct {
 	Message models.Message
+	To      string
 }
 
 type SendMessageResponse struct {
@@ -13,5 +14,5 @@ type MessageGateway interface {
 	Send(request SendMessageRequest, smr chan<- *SendMessageResponse) error
 }
 type MessageEncrypter interface {
-	EncryptPlainText(to string, text string) (*models.Message, error)
+	EncryptPlainText(publicKey string, text string) (*models.Message, error)
 }
