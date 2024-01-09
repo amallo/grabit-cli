@@ -8,9 +8,9 @@ type KnownRecipientGateway struct {
 	WillLoadPublicKey string
 }
 
-func (lig *KnownRecipientGateway) FetchPublicKey(email string, response chan<- *gateways.FetchPublicKeyRequestResponse) error {
+func (lig *KnownRecipientGateway) FetchPublicKey(email string, response chan<- *gateways.FetchPublicKeyResponse) error {
 	go func() {
-		response <- &gateways.FetchPublicKeyRequestResponse{PublicKey: lig.WillLoadPublicKey}
+		response <- &gateways.FetchPublicKeyResponse{PublicKey: lig.WillLoadPublicKey}
 	}()
 	return nil
 }

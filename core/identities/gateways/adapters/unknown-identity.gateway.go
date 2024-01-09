@@ -14,3 +14,7 @@ func (lig *UnknownIdentityGateway) LoadCurrent(response chan<- *gateways.LoadIde
 	}()
 	return errors.New("UNKNOWN IDENTITY")
 }
+
+func (lig *UnknownIdentityGateway) Register(request gateways.RegisterIdentityRequest) error {
+	return nil
+}

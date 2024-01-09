@@ -30,19 +30,21 @@ func NewSendTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 
 func (uc *sendTextPlainMessageUseCase) Execute(params SendTextPlainMessageParams) (*SendTextPlainMessageResponse, error) {
 	identityChan := make(chan *identities_gateway.LoadIdentityResponse, 1)
-	error := uc.identityGateway.LoadCurrent(identityChan)
 	defer close(identityChan)
+	error := uc.identityGateway.LoadCurrent(identityChan)
 	if error != nil {
 		return nil, errors.New("UNKNOWN_IDENTITY")
 	}
 
-	recipientChan := make(chan *identities_gateway.FetchPublicKeyRequestResponse, 1)
+	recipientChan := make(chan *identities_gateway.FetchPublicKeyResponse, 1)
 	error = uc.recipientGateway.FetchPublicKey(params.To, recipientChan)
-	defer close(recipientChan)
+
 	if error != nil {
 		return nil, errors.New("UNKNOWN_RECIPIENT")
 	}
 	recipientIdentityResponse := <-recipientChan
+
+	defer close(recipientChan)
 
 	message, error := uc.messageEncrypter.EncryptPlainText(recipientIdentityResponse.PublicKey, params.Content)
 	if error != nil {

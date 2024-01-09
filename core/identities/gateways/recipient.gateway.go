@@ -1,9 +1,9 @@
 package gateways
 
-type FetchPublicKeyRequestResponse struct {
+type FetchPublicKeyResponse struct {
 	PublicKey string
 }
 
 type RecipientGateway interface {
-	FetchPublicKey(email string, rir chan<- *FetchPublicKeyRequestResponse) error
+	FetchPublicKey(email string, rir chan<- *FetchPublicKeyResponse) error
 }
