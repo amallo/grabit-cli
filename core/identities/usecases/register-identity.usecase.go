@@ -20,11 +20,8 @@ func NewRegisterIdentityUseCase(identityGateway gateways.IdentityGateway) regist
 }
 
 func (uc *registerIdentityUseCase) Execute(request RegisterIdentityRequest) error {
-	identityChan := make(chan *gateways.LoadIdentityResponse, 1)
-	defer close(identityChan)
 
-	err := uc.identityGateway.LoadCurrent(identityChan)
-	<-identityChan
+	_, err := uc.identityGateway.LoadCurrent()
 	if err == nil {
 		return errors.New("ALREADY_HAVE_IDENTITY")
 	}

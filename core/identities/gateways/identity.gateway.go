@@ -16,6 +16,6 @@ type RegisteredIdentityResponse struct {
 }
 
 type IdentityGateway interface {
-	LoadCurrent(response chan<- *LoadIdentityResponse) error
+	LoadCurrent() (*LoadIdentityResponse, error)
 	Register(request RegisterIdentityRequest) error
 }

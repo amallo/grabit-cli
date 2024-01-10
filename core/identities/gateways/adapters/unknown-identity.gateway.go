@@ -8,11 +8,8 @@ import (
 type UnknownIdentityGateway struct {
 }
 
-func (lig *UnknownIdentityGateway) LoadCurrent(response chan<- *gateways.LoadIdentityResponse) error {
-	go func() {
-		response <- nil
-	}()
-	return errors.New("UNKNOWN IDENTITY")
+func (lig *UnknownIdentityGateway) LoadCurrent() (*gateways.LoadIdentityResponse, error) {
+	return nil, errors.New("UNKNOWN IDENTITY")
 }
 
 func (lig *UnknownIdentityGateway) Register(request gateways.RegisterIdentityRequest) error {

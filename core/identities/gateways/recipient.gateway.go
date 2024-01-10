@@ -5,5 +5,5 @@ type FetchPublicKeyResponse struct {
 }
 
 type RecipientGateway interface {
-	FetchPublicKey(email string, rir chan<- *FetchPublicKeyResponse) error
+	FetchPublicKey(email string) (*FetchPublicKeyResponse, error)
 }

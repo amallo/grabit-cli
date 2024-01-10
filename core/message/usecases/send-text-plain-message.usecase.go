@@ -29,36 +29,26 @@ func NewSendTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 }
 
 func (uc *sendTextPlainMessageUseCase) Execute(params SendTextPlainMessageParams) (*SendTextPlainMessageResponse, error) {
-	identityChan := make(chan *identities_gateway.LoadIdentityResponse, 1)
-	defer close(identityChan)
-	error := uc.identityGateway.LoadCurrent(identityChan)
+	_, error := uc.identityGateway.LoadCurrent()
 	if error != nil {
 		return nil, errors.New("UNKNOWN_IDENTITY")
 	}
 
-	recipientChan := make(chan *identities_gateway.FetchPublicKeyResponse, 1)
-	error = uc.recipientGateway.FetchPublicKey(params.To, recipientChan)
+	recipientIdentityResponse, error := uc.recipientGateway.FetchPublicKey(params.To)
 
 	if error != nil {
 		return nil, errors.New("UNKNOWN_RECIPIENT")
 	}
-	recipientIdentityResponse := <-recipientChan
-
-	defer close(recipientChan)
 
 	message, error := uc.messageEncrypter.EncryptPlainText(recipientIdentityResponse.PublicKey, params.Content)
 	if error != nil {
 		return nil, errors.New("ENCRYPTION_FAILURE")
 	}
 
-	sendMessageChan := make(chan *gateways.SendMessageResponse, 1)
-	defer close(sendMessageChan)
-
 	request := gateways.SendMessageRequest{Message: *message, To: params.To}
-	error = uc.messageGateway.Send(request, sendMessageChan)
+	response, error := uc.messageGateway.Send(request)
 	if error != nil {
 		return nil, errors.New("TRANSMISSION_FAILURE")
 	}
-	response := <-sendMessageChan
 	return &SendTextPlainMessageResponse{Url: response.Url}, nil
 }

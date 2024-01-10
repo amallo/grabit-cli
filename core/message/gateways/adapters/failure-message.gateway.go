@@ -8,9 +8,6 @@ import (
 type FailureMessageGateway struct {
 }
 
-func (fmg *FailureMessageGateway) Send(request gateways.SendMessageRequest, response chan<- *gateways.SendMessageResponse) error {
-	go func() {
-		response <- nil
-	}()
-	return errors.New("SENDING FAILS")
+func (fmg *FailureMessageGateway) Send(request gateways.SendMessageRequest) (*gateways.SendMessageResponse, error) {
+	return nil, errors.New("SENDING FAILS")
 }

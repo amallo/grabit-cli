@@ -8,9 +8,6 @@ import (
 type UnknownRecipientGateway struct {
 }
 
-func (lig *UnknownRecipientGateway) FetchPublicKey(email string, response chan<- *gateways.FetchPublicKeyResponse) error {
-	go func() {
-		response <- nil
-	}()
-	return errors.New("UNKNOWN_RECIPIENT")
+func (lig *UnknownRecipientGateway) FetchPublicKey(email string) (*gateways.FetchPublicKeyResponse, error) {
+	return nil, errors.New("UNKNOWN_RECIPIENT")
 }
