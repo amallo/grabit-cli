@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "grabit-cli/app/cmd"
 
 func main() {
-	fmt.Println("Hello, world.")
+	cmd.Execute()
 }
