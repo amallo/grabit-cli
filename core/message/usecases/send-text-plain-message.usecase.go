@@ -3,52 +3,52 @@ package core
 import (
 	"errors"
 	identities_gateway "grabit-cli/core/identities/gateways"
+	"grabit-cli/core/identities/models"
 	"grabit-cli/core/message/gateways"
+	models2 "grabit-cli/core/message/models"
 )
 
 type sendTextPlainMessageUseCase struct {
-	messageGateway   gateways.MessageGateway
-	messageEncrypter gateways.MessageEncrypter
-	recipientGateway identities_gateway.RecipientGateway
-	identityGateway  identities_gateway.IdentityGateway
+	messageGateway  gateways.MessageGateway
+	identityGateway identities_gateway.IdentityGateway
 }
-type SendTextPlainMessageParams struct {
-	To      string
-	Content string
+type SendTextPlainMessageArgs struct {
+	To       string
+	From     string
+	Password string
+	Content  string
 }
-type SendTextPlainMessageResponse struct {
-	Url string
+type SendTextPlainMessageResult struct {
+	Url  string
+	From models.Identity
+	To   models.Identity
 }
 
 func NewSendTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
-	messageEncrypter gateways.MessageEncrypter,
-	recipientGateway identities_gateway.RecipientGateway,
 	identityGateway identities_gateway.IdentityGateway,
 ) sendTextPlainMessageUseCase {
-	return sendTextPlainMessageUseCase{messageGateway: messageGateway, messageEncrypter: messageEncrypter, recipientGateway: recipientGateway, identityGateway: identityGateway}
+	return sendTextPlainMessageUseCase{messageGateway: messageGateway, identityGateway: identityGateway}
 }
 
-func (uc *sendTextPlainMessageUseCase) Execute(params SendTextPlainMessageParams) (*SendTextPlainMessageResponse, error) {
-	_, error := uc.identityGateway.LoadCurrent()
+func (uc *sendTextPlainMessageUseCase) Execute(params SendTextPlainMessageArgs) (*SendTextPlainMessageResult, error) {
+	senderIdentityResponse, error := uc.identityGateway.LoadCurrent(params.From)
 	if error != nil {
 		return nil, errors.New("UNKNOWN_IDENTITY")
 	}
 
-	recipientIdentityResponse, error := uc.recipientGateway.FetchPublicKey(params.To)
-
+	recipientIdentityResponse, error := uc.identityGateway.LoadCurrent(params.To)
 	if error != nil {
 		return nil, errors.New("UNKNOWN_RECIPIENT")
 	}
 
-	message, error := uc.messageEncrypter.EncryptPlainText(recipientIdentityResponse.PublicKey, params.Content)
-	if error != nil {
-		return nil, errors.New("ENCRYPTION_FAILURE")
-	}
+	fromIdentity := models.Identity{Email: params.From, Name: senderIdentityResponse.Name}
+	toIdentity := models.Identity{Email: params.To, Name: recipientIdentityResponse.Name}
+	message := models2.Message{Content: params.Content, From: fromIdentity, To: toIdentity}
 
-	request := gateways.SendMessageRequest{Message: *message, To: params.To}
-	response, error := uc.messageGateway.Send(request)
+	dropRequest := gateways.DropMessageRequest{Message: message, Password: params.Password}
+	result, error := uc.messageGateway.Drop(dropRequest)
 	if error != nil {
 		return nil, errors.New("TRANSMISSION_FAILURE")
 	}
-	return &SendTextPlainMessageResponse{Url: response.Url}, nil
+	return &SendTextPlainMessageResult{Url: result.Url, From: fromIdentity, To: toIdentity}, nil
 }

@@ -3,11 +3,11 @@ package adapters
 import "grabit-cli/core/message/gateways"
 
 type FakeMessageGateway struct {
-	GeneratedUrl             string
-	WillSentTextPlainContent string
+	GeneratedUrl        string
+	WillSentTextContent string
 }
 
-func (fmg *FakeMessageGateway) Send(request gateways.SendMessageRequest) (*gateways.SendMessageResponse, error) {
-	fmg.WillSentTextPlainContent = request.Message.Content
-	return &gateways.SendMessageResponse{Url: fmg.GeneratedUrl}, nil
+func (fmg *FakeMessageGateway) Drop(request gateways.DropMessageRequest) (*gateways.DropMessageResponse, error) {
+	fmg.WillSentTextContent = request.Message.Content
+	return &gateways.DropMessageResponse{Url: fmg.GeneratedUrl}, nil
 }
