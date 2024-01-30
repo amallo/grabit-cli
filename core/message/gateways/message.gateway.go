@@ -8,8 +8,19 @@ type DropMessageRequest struct {
 }
 
 type DropMessageResponse struct {
-	Url string
+	Url       string
+	MessageId string
+}
+type GrabMessageRequest struct {
+	Id       string
+	Email    string
+	Password string
+}
+
+type GrabMessageResponse struct {
+	Content string
 }
 type MessageGateway interface {
 	Drop(request DropMessageRequest) (*DropMessageResponse, error)
+	Grab(request GrabMessageRequest) (*GrabMessageResponse, error)
 }
