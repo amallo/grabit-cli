@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	common_errors "grabit-cli/core/common/errors"
 	identities_gateway "grabit-cli/core/identities/gateways"
 	"grabit-cli/core/identities/models"
 	"grabit-cli/core/message/gateways"
@@ -36,7 +37,7 @@ func NewDropTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 func (uc *dropTextPlainMessageUseCase) Execute(params DropTextPlainMessageArgs) (*DropTextPlainMessageResult, error) {
 	senderIdentityResponse, err := uc.identityGateway.LoadCurrent(params.From)
 	if err != nil {
-		return nil, errors.New("UNKNOWN_IDENTITY")
+		return nil, common_errors.UnknownIdentityError{Email: params.From, CausedBy: err.Error()}
 	}
 
 	recipientIdentityResponse, err := uc.identityGateway.LoadCurrent(params.To)

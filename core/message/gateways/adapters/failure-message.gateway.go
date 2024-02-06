@@ -6,6 +6,7 @@ import (
 )
 
 type FailureMessageGateway struct {
+	GrabMessageFailure error
 }
 
 func (fmg *FailureMessageGateway) Drop(request gateways.DropMessageRequest) (*gateways.DropMessageResponse, error) {
@@ -13,5 +14,5 @@ func (fmg *FailureMessageGateway) Drop(request gateways.DropMessageRequest) (*ga
 }
 
 func (fmg *FailureMessageGateway) Grab(request gateways.GrabMessageRequest) (*gateways.GrabMessageResponse, error) {
-	return nil, errors.New("GRAP MESSAGE FAILS")
+	return nil, fmg.GrabMessageFailure
 }

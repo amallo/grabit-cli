@@ -20,7 +20,7 @@ func (fmg *FakeMessageGateway) Drop(request gateways.DropMessageRequest) (*gatew
 }
 
 func (fmg *FakeMessageGateway) Grab(request gateways.GrabMessageRequest) (*gateways.GrabMessageResponse, error) {
-	droppedMessage := fmg.WillDropMessage[request.Id]
-	delete(fmg.WillDropMessage, request.Id)
+	droppedMessage := fmg.WillDropMessage[request.MessageId]
+	delete(fmg.WillDropMessage, request.MessageId)
 	return &gateways.GrabMessageResponse{Content: droppedMessage.Content}, nil
 }

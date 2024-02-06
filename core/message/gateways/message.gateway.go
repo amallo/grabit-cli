@@ -1,6 +1,9 @@
 package gateways
 
-import "grabit-cli/core/message/models"
+import (
+	id_models "grabit-cli/core/identities/models"
+	"grabit-cli/core/message/models"
+)
 
 type DropMessageRequest struct {
 	Message  models.Message
@@ -12,14 +15,15 @@ type DropMessageResponse struct {
 	MessageId string
 }
 type GrabMessageRequest struct {
-	Id       string
-	Email    string
-	Password string
+	MessageId string
+	Password  string
+	Identity  id_models.Identity
 }
 
 type GrabMessageResponse struct {
 	Content string
 }
+
 type MessageGateway interface {
 	Drop(request DropMessageRequest) (*DropMessageResponse, error)
 	Grab(request GrabMessageRequest) (*GrabMessageResponse, error)
