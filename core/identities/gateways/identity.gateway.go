@@ -3,7 +3,7 @@ package gateways
 import "grabit-cli/core/identities/models"
 
 type LoadIdentityResponse struct {
-	Email string
+	Name string
 }
 
 type RegisterIdentityRequest struct {
@@ -16,6 +16,6 @@ type RegisteredIdentityResponse struct {
 }
 
 type IdentityGateway interface {
-	LoadCurrent() (*LoadIdentityResponse, error)
+	LoadCurrent(email string) (*LoadIdentityResponse, error)
 	Register(request RegisterIdentityRequest) error
 }
