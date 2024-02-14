@@ -1,17 +1,28 @@
 package adapters
 
-import "github.com/pterm/pterm"
+import (
+	"fmt"
 
+	"github.com/pterm/pterm"
+)
+
+type Context struct {
+	Name string
+}
 type PtermLogger struct {
-	Logger pterm.Logger
+	Logger  pterm.Logger
+	Context Context
 }
 
-func (l *PtermLogger) Trace(message string) {
-	l.Logger.Trace(message)
+func (l PtermLogger) Trace(message string) {
+	msg := fmt.Sprintf("[%s] %s", l.Context.Name, message)
+	l.Logger.Trace(msg)
 }
-func (l *PtermLogger) Info(message string) {
-	l.Logger.Info(message)
+func (l PtermLogger) Info(message string) {
+	msg := fmt.Sprintf("[%s] %s", l.Context.Name, message)
+	l.Logger.Info(msg)
 }
-func (l *PtermLogger) Error(message string, err error) {
-	l.Logger.Error(message, l.Logger.Args("error", err.Error()))
+func (l PtermLogger) Error(message string, err error) {
+	msg := fmt.Sprintf("[%s] %s", l.Context.Name, message)
+	l.Logger.Error(msg, l.Logger.Args("error", err.Error()))
 }

@@ -7,8 +7,6 @@ import (
 )
 
 type FakeIdentityGateway struct {
-	WillHaveIdentityEmail       string
-	WillHaveIdentityName        string
 	WillFaildentityRegistration error
 	WillHaveReceiverIdentity    models.Identity
 	WillHaveSenderIdentity      models.Identity

@@ -1,15 +1,14 @@
 package usecases
 
 import (
-	"errors"
+	core_errors "grabit-cli/core/common/errors"
 	"grabit-cli/core/identities/gateways"
-	message_gateways "grabit-cli/core/message/gateways"
+	"grabit-cli/core/identities/models"
 )
 
 type registerIdentityUseCase struct {
 	identityGateway gateways.IdentityGateway
 	idNameGenerator gateways.NameGenerator
-	messageGateway  message_gateways.MessageGateway
 }
 
 type RegisterIdentityParams struct {
@@ -20,20 +19,20 @@ type registerIdentityResult struct {
 	Name string
 }
 
-func NewRegisterIdentityUseCase(identityGateway gateways.IdentityGateway, nameGenerator gateways.NameGenerator, messageGateway message_gateways.MessageGateway) registerIdentityUseCase {
-	return registerIdentityUseCase{identityGateway: identityGateway, idNameGenerator: nameGenerator, messageGateway: messageGateway}
+func NewRegisterIdentityUseCase(identityGateway gateways.IdentityGateway, nameGenerator gateways.NameGenerator) registerIdentityUseCase {
+	return registerIdentityUseCase{identityGateway: identityGateway, idNameGenerator: nameGenerator}
 }
 
-func (uc *registerIdentityUseCase) Execute(request RegisterIdentityParams) (*registerIdentityResult, error) {
+func (uc *registerIdentityUseCase) Execute(request RegisterIdentityParams) (*registerIdentityResult, core_errors.Error) {
 	_, err := uc.identityGateway.LoadCurrent(request.Email)
 	if err == nil {
-		return nil, errors.New("ALREADY_HAVE_IDENTITY")
+		return nil, core_errors.Err(models.ErrIdentityAlreadyRegistered, err)
 	}
 	name := uc.idNameGenerator.Generate(request.Email)
 
 	err = uc.identityGateway.Register(gateways.RegisterIdentityRequest{Email: request.Email, Name: name, PassPhrase: request.PassPhrase})
 	if err != nil {
-		return nil, errors.New("IDENTITY_REGISTRATION_FAILED")
+		return nil, core_errors.Err(models.ErrCannotRegisterIdentity, err)
 	}
 	result := registerIdentityResult{Name: name}
 	return &result, nil

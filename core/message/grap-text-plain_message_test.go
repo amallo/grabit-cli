@@ -2,11 +2,10 @@ package message
 
 import (
 	"errors"
-	common_errors "grabit-cli/core/common/errors"
 	id_adapters "grabit-cli/core/identities/gateways/adapters"
 	"grabit-cli/core/message/gateways/adapters"
 	"grabit-cli/core/message/models"
-	core "grabit-cli/core/message/usecases"
+	message_usecases "grabit-cli/core/message/usecases"
 	"testing"
 
 	. "github.com/franela/goblin"
@@ -33,21 +32,21 @@ func TestGrabMessage(t *testing.T) {
 		})
 
 		g.It("Successfully grab message content", func() {
-			useCase := core.NewGrabMessageUseCase(&messageGateway, fakeIdentityGateway, &fakeMessageIdGenerator)
-			args := core.GrabMessageArgs{MessageId: "msg-0", Email: "michael@foo.com", Password: "prune"}
+			useCase := message_usecases.NewGrabMessageUseCase(&messageGateway, fakeIdentityGateway, &fakeMessageIdGenerator)
+			args := message_usecases.GrabMessageArgs{MessageId: "msg-0", Email: "michael@foo.com", Password: "prune"}
 			result, err := useCase.Execute(args)
 
 			g.Assert(err).IsNil()
 			g.Assert(result.Content).Equal("binouze ce soir 19h")
 		})
 
-		g.It("Fails to grab non existing message", func() {
+		g.It("Fails to grab message", func() {
 			failureGateway := adapters.FailureMessageGateway{GrabMessageFailure: errors.New("CANNOT_RETRIEVE_MESSAGE")}
-			useCase := core.NewGrabMessageUseCase(&failureGateway, fakeIdentityGateway, &fakeMessageIdGenerator)
-			args := core.GrabMessageArgs{MessageId: "msg-not-found", Email: "michael@foo.com", Password: "prune"}
+			useCase := message_usecases.NewGrabMessageUseCase(&failureGateway, fakeIdentityGateway, &fakeMessageIdGenerator)
+			args := message_usecases.GrabMessageArgs{MessageId: "msg-not-found", Email: "michael@foo.com", Password: "prune"}
 			result, err := useCase.Execute(args)
-			g.Assert(errors.Is(err, common_errors.NotFoundError{Category: "Message", Id: "msg-not-found", CausedBy: "CANNOT_RETRIEVE_MESSAGE"})).IsTrue()
 			g.Assert(result).IsNil()
+			g.Assert(err.Code()).Equal(message_usecases.ErrGrapMessageFailure)
 		})
 
 	})

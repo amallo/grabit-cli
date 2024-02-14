@@ -2,13 +2,8 @@ package adapters
 
 import (
 	"errors"
-	"fmt"
 	common_gateways "grabit-cli/core/common/gateways"
 	"grabit-cli/core/identities/gateways"
-	"os"
-	"path/filepath"
-
-	"github.com/ProtonMail/gopenpgp/v2/crypto"
 )
 
 type FsIdentityGateway struct {
@@ -33,7 +28,8 @@ func NewFsIdentityGateway(identityPath IdentityPath, publicKeyFileName string, p
 
 func (lig *FsIdentityGateway) LoadCurrent(email string) (*gateways.LoadIdentityResponse, error) {
 	lig.logger.Trace("Checking home folder...")
-	homeDir, err := os.UserHomeDir()
+	return nil, errors.New("ERROR")
+	/*homeDir, err := os.UserHomeDir()
 	if err != nil {
 		lig.logger.Error("Cannot read home folder", err)
 		return nil, errors.New("HOME NOT FOUND")
@@ -74,12 +70,12 @@ func (lig *FsIdentityGateway) LoadCurrent(email string) (*gateways.LoadIdentityR
 	}
 	err = errors.New("PUBLIC KEY NOT MATCH")
 	lig.logger.Error("Public key not match your email identity ", err)
-	return nil, err
+	return nil, err*/
 
 }
 
 func (lig *FsIdentityGateway) Register(request gateways.RegisterIdentityRequest) error {
-	homeDir, err := os.UserHomeDir()
+	/*homeDir, err := os.UserHomeDir()
 	if err != nil {
 		lig.logger.Error("Error while reading home golder :", err)
 		return errors.New("CANNOT_READ_HOME")
@@ -149,7 +145,7 @@ func (lig *FsIdentityGateway) Register(request gateways.RegisterIdentityRequest)
 	if err != nil {
 		lig.logger.Error("Error while writing private key file", err)
 		return errors.New("CANNOT_WRITE_PUBLIC_KEY")
-	}
+	}*/
 
 	return nil
 }

@@ -1,8 +1,7 @@
-package core
+package usecases
 
 import (
-	"errors"
-	common_errors "grabit-cli/core/common/errors"
+	core_errors "grabit-cli/core/common/errors"
 	identities_gateway "grabit-cli/core/identities/gateways"
 	"grabit-cli/core/identities/models"
 	"grabit-cli/core/message/gateways"
@@ -22,8 +21,8 @@ type DropTextPlainMessageArgs struct {
 }
 type DropTextPlainMessageResult struct {
 	Url       string
-	From      models.Identity
-	To        models.Identity
+	Sender    models.Identity
+	Recipient models.Identity
 	MessageId string
 }
 
@@ -34,26 +33,26 @@ func NewDropTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 	return dropTextPlainMessageUseCase{messageGateway: messageGateway, identityGateway: identityGateway, messageIdGenerator: messageIdGenerator}
 }
 
-func (uc *dropTextPlainMessageUseCase) Execute(params DropTextPlainMessageArgs) (*DropTextPlainMessageResult, error) {
+func (uc *dropTextPlainMessageUseCase) Execute(params DropTextPlainMessageArgs) (*DropTextPlainMessageResult, core_errors.Error) {
 	senderIdentityResponse, err := uc.identityGateway.LoadCurrent(params.From)
 	if err != nil {
-		return nil, common_errors.UnknownIdentityError{Email: params.From, CausedBy: err.Error()}
+		return nil, core_errors.Err(models.ErrUnknownIdentity, err)
 	}
 
 	recipientIdentityResponse, err := uc.identityGateway.LoadCurrent(params.To)
 	if err != nil {
-		return nil, errors.New("UNKNOWN_RECIPIENT")
+		return nil, core_errors.Err(models.ErrUnknownIdentity, err)
 	}
 
-	fromIdentity := models.Identity{Email: params.From, Name: senderIdentityResponse.Name}
-	toIdentity := models.Identity{Email: params.To, Name: recipientIdentityResponse.Name}
+	senderIdentity := models.Identity{Email: params.From, Name: senderIdentityResponse.Name}
+	recipientIdentity := models.Identity{Email: params.To, Name: recipientIdentityResponse.Name}
 	newMessageId := uc.messageIdGenerator.Generate()
-	message := models2.Message{Content: params.Content, From: fromIdentity, To: toIdentity, Id: newMessageId}
+	message := models2.Message{Content: params.Content, From: senderIdentity, To: recipientIdentity, Id: newMessageId}
 
 	dropRequest := gateways.DropMessageRequest{Message: message, Password: params.Password}
 	dropResponse, err := uc.messageGateway.Drop(dropRequest)
 	if err != nil {
-		return nil, errors.New("DROP_MESSAGE_FAILURE")
+		return nil, core_errors.Err(ErrDropMessageFailure, err)
 	}
-	return &DropTextPlainMessageResult{Url: dropResponse.Url, From: fromIdentity, To: toIdentity, MessageId: message.Id}, nil
+	return &DropTextPlainMessageResult{Url: dropResponse.Url, Sender: senderIdentity, Recipient: recipientIdentity, MessageId: message.Id}, nil
 }

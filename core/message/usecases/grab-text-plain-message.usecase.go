@@ -1,8 +1,7 @@
-package core
+package usecases
 
 import (
-	"errors"
-	common_errors "grabit-cli/core/common/errors"
+	core_errors "grabit-cli/core/common/errors"
 	identities_gateway "grabit-cli/core/identities/gateways"
 	"grabit-cli/core/identities/models"
 	"grabit-cli/core/message/gateways"
@@ -29,16 +28,16 @@ func NewGrabMessageUseCase(messageGateway gateways.MessageGateway,
 	return grabMessageUseCase{messageGateway: messageGateway, identityGateway: identityGateway, messageIdGenerator: messageIdGenerator}
 }
 
-func (uc grabMessageUseCase) Execute(params GrabMessageArgs) (*GrabMessageResult, error) {
+func (uc grabMessageUseCase) Execute(params GrabMessageArgs) (*GrabMessageResult, core_errors.Error) {
 	identityResponse, err := uc.identityGateway.LoadCurrent(params.Email)
 	if err != nil {
-		return nil, errors.New("UNKNOWN_IDENTITY")
+		return nil, core_errors.Err(models.ErrUnknownIdentity, err)
 	}
 	identity := models.Identity{Email: params.Email, Name: identityResponse.Name}
 	grabRequest := gateways.GrabMessageRequest{MessageId: params.MessageId, Password: params.Password, Identity: identity}
 	grabResponse, err := uc.messageGateway.Grab(grabRequest)
 	if err != nil {
-		return nil, common_errors.NotFoundError{Category: "Message", CausedBy: err.Error(), Id: params.MessageId}
+		return nil, core_errors.Err(ErrGrapMessageFailure, err)
 	}
 	return &GrabMessageResult{Content: grabResponse.Content}, nil
 }
