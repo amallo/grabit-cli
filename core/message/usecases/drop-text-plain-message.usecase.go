@@ -7,7 +7,7 @@ import (
 	models2 "grabit-cli/core/message/models"
 )
 
-type dropTextPlainMessageUseCase struct {
+type DropTextPlainMessageUseCase struct {
 	messageGateway     gateways.MessageGateway
 	messageIdGenerator gateways.MessageIdGenerator
 }
@@ -17,7 +17,7 @@ type DropTextPlainMessageArgs struct {
 	Password  string
 	Content   string
 }
-type dropTextPlainMessageResult struct {
+type DropTextPlainMessageResult struct {
 	Url       string
 	Sender    models.Identity
 	Recipient models.Identity
@@ -26,20 +26,20 @@ type dropTextPlainMessageResult struct {
 
 func NewDropTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 	messageIdGenerator gateways.MessageIdGenerator,
-) dropTextPlainMessageUseCase {
-	return dropTextPlainMessageUseCase{messageGateway: messageGateway, messageIdGenerator: messageIdGenerator}
+) DropTextPlainMessageUseCase {
+	return DropTextPlainMessageUseCase{messageGateway: messageGateway, messageIdGenerator: messageIdGenerator}
 }
 
-func (uc *dropTextPlainMessageUseCase) Execute(params DropTextPlainMessageArgs) (*dropTextPlainMessageResult, core_errors.Error) {
-	sender := models.Identity{Email: params.Sender}
-	recipient := models.Identity{Email: params.Recipient}
+func (uc *DropTextPlainMessageUseCase) Execute(args DropTextPlainMessageArgs) (*DropTextPlainMessageResult, core_errors.Error) {
+	sender := models.Identity{Email: args.Sender}
+	recipient := models.Identity{Email: args.Recipient}
 	newMessageId := uc.messageIdGenerator.Generate()
-	message := models2.Message{Content: params.Content, From: sender, To: recipient, Id: newMessageId}
+	message := models2.Message{Content: args.Content, From: sender, To: recipient, Id: newMessageId}
 
-	dropRequest := gateways.DropMessageRequest{Message: message, Password: params.Password}
+	dropRequest := gateways.DropMessageRequest{Message: message, Password: args.Password}
 	dropResponse, err := uc.messageGateway.Drop(dropRequest)
 	if err != nil {
 		return nil, core_errors.Err(ErrDropMessageFailure, err)
 	}
-	return &dropTextPlainMessageResult{Url: dropResponse.Url, Recipient: recipient, MessageId: message.Id}, nil
+	return &DropTextPlainMessageResult{Url: dropResponse.Url, Recipient: recipient, MessageId: message.Id}, nil
 }

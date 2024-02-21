@@ -7,8 +7,7 @@ import (
 )
 
 type grabMessageUseCase struct {
-	messageGateway     gateways.MessageGateway
-	messageIdGenerator gateways.MessageIdGenerator
+	messageGateway gateways.MessageGateway
 }
 type GrabMessageArgs struct {
 	Email     string
@@ -20,9 +19,8 @@ type GrabMessageResult struct {
 }
 
 func NewGrabMessageUseCase(messageGateway gateways.MessageGateway,
-	messageIdGenerator gateways.MessageIdGenerator,
 ) grabMessageUseCase {
-	return grabMessageUseCase{messageGateway: messageGateway, messageIdGenerator: messageIdGenerator}
+	return grabMessageUseCase{messageGateway: messageGateway}
 }
 
 func (uc grabMessageUseCase) Execute(params GrabMessageArgs) (*GrabMessageResult, core_errors.Error) {
