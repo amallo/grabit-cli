@@ -31,7 +31,7 @@ func TestDropMessage(t *testing.T) {
 
 		g.It("Successfully drop message content", func() {
 			useCase := usecases.NewDropTextPlainMessageUseCase(&messageGateway, &fakeIdentityGateway, &fakeMessageIdGenerator)
-			args := usecases.DropTextPlainMessageArgs{To: "michael@foo.com", Content: "binouze ce soir 19h", From: "audie@foo.com", Password: "prune"}
+			args := usecases.DropTextPlainMessageArgs{Recipient: "michael@foo.com", Content: "binouze ce soir 19h", Sender: "audie@foo.com", Password: "prune"}
 			result, err := useCase.Execute(args)
 
 			g.Assert(err).IsNil()
@@ -46,7 +46,7 @@ func TestDropMessage(t *testing.T) {
 
 		g.It("Fails to send text plain content to unknown recipient", func() {
 			useCase := usecases.NewDropTextPlainMessageUseCase(&messageGateway, &fakeIdentityGateway, &fakeMessageIdGenerator)
-			args := usecases.DropTextPlainMessageArgs{To: "michael@not-found.com", Content: "binouze ce soir 19h", From: "audie@foo.com", Password: "prune"}
+			args := usecases.DropTextPlainMessageArgs{Recipient: "michael@not-found.com", Content: "binouze ce soir 19h", Sender: "audie@foo.com", Password: "prune"}
 			result, err := useCase.Execute(args)
 
 			g.Assert(result).IsNil()
@@ -55,7 +55,7 @@ func TestDropMessage(t *testing.T) {
 
 		g.It("Fails to drop text plain content from unknown identity", func() {
 			useCase := usecases.NewDropTextPlainMessageUseCase(&messageGateway, &fakeIdentityGateway, &fakeMessageIdGenerator)
-			args := usecases.DropTextPlainMessageArgs{To: "michael@foo.com", Content: "binouze ce soir 19h", From: "audie@not-found.com", Password: "prune"}
+			args := usecases.DropTextPlainMessageArgs{Recipient: "michael@foo.com", Content: "binouze ce soir 19h", Sender: "audie@not-found.com", Password: "prune"}
 			result, err := useCase.Execute(args)
 			g.Assert(result).IsNil()
 			g.Assert(err.Code()).Equal(models.ErrUnknownIdentity)
@@ -65,7 +65,7 @@ func TestDropMessage(t *testing.T) {
 		g.It("Fails to drop text plain content", func() {
 			failureMessageGateway := &adapters.FailureMessageGateway{}
 			useCase := usecases.NewDropTextPlainMessageUseCase(failureMessageGateway, &fakeIdentityGateway, &fakeMessageIdGenerator)
-			params := usecases.DropTextPlainMessageArgs{To: "michael@foo.com", Content: "binouze ce soir 19h", From: "audie@foo.com", Password: "prune"}
+			params := usecases.DropTextPlainMessageArgs{Recipient: "michael@foo.com", Content: "binouze ce soir 19h", Sender: "audie@foo.com", Password: "prune"}
 			result, err := useCase.Execute(params)
 
 			g.Assert(result).IsNil()

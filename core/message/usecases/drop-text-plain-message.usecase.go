@@ -14,10 +14,10 @@ type dropTextPlainMessageUseCase struct {
 	messageIdGenerator gateways.MessageIdGenerator
 }
 type DropTextPlainMessageArgs struct {
-	To       string
-	From     string
-	Password string
-	Content  string
+	Recipient string
+	Sender    string
+	Password  string
+	Content   string
 }
 type DropTextPlainMessageResult struct {
 	Url       string
@@ -34,18 +34,18 @@ func NewDropTextPlainMessageUseCase(messageGateway gateways.MessageGateway,
 }
 
 func (uc *dropTextPlainMessageUseCase) Execute(params DropTextPlainMessageArgs) (*DropTextPlainMessageResult, core_errors.Error) {
-	senderIdentityResponse, err := uc.identityGateway.LoadCurrent(params.From)
+	senderIdentityResponse, err := uc.identityGateway.LoadCurrent(params.Sender)
 	if err != nil {
 		return nil, core_errors.Err(models.ErrUnknownIdentity, err)
 	}
 
-	recipientIdentityResponse, err := uc.identityGateway.LoadCurrent(params.To)
+	recipientIdentityResponse, err := uc.identityGateway.LoadCurrent(params.Recipient)
 	if err != nil {
 		return nil, core_errors.Err(models.ErrUnknownIdentity, err)
 	}
 
-	senderIdentity := models.Identity{Email: params.From, Name: senderIdentityResponse.Name}
-	recipientIdentity := models.Identity{Email: params.To, Name: recipientIdentityResponse.Name}
+	senderIdentity := models.Identity{Email: params.Sender, Name: senderIdentityResponse.Name}
+	recipientIdentity := models.Identity{Email: params.Recipient, Name: recipientIdentityResponse.Name}
 	newMessageId := uc.messageIdGenerator.Generate()
 	message := models2.Message{Content: params.Content, From: senderIdentity, To: recipientIdentity, Id: newMessageId}
 
