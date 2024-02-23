@@ -4,7 +4,7 @@ import (
 	core_errors "grabit-cli/core/common/errors"
 	"grabit-cli/core/identities/models"
 	"grabit-cli/core/message/gateways"
-	models2 "grabit-cli/core/message/models"
+	message_models "grabit-cli/core/message/models"
 )
 
 type DropTextPlainMessageUseCase struct {
@@ -34,7 +34,7 @@ func (uc *DropTextPlainMessageUseCase) Execute(args DropTextPlainMessageArgs) (*
 	sender := models.Identity{Email: args.Sender}
 	recipient := models.Identity{Email: args.Recipient}
 	newMessageId := uc.messageIdGenerator.Generate()
-	message := models2.Message{Content: args.Content, From: sender, To: recipient, Id: newMessageId}
+	message := message_models.Message{Content: args.Content, From: sender, To: recipient, Id: newMessageId}
 
 	dropRequest := gateways.DropMessageRequest{Message: message, Password: args.Password}
 	dropResponse, err := uc.messageGateway.Drop(dropRequest)
